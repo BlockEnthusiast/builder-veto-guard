@@ -123,10 +123,69 @@ The slot should now end with the guard address.
 - Every owner-signed Safe transaction reverts in a block Titan built. The Safe nonce stays unused,
   so you can execute the same signed transaction again. It lands once another builder builds the
   block.
-- The executor pays gas for every failed attempt. Send executions through a private RPC that
-  excludes Titan, and keep them out of the public mempool.
+- The executor pays gas for every failed attempt. Send executions through a route that never
+  reaches Titan, and keep them out of the public mempool. See the next section.
 - Simulations at gas price 0 still pass. That is the default for `eth_call` and gas estimation. A
   simulation that sets a gas price fails while the latest block is Titan's.
+
+## Send executions without Titan
+
+The guard stops a Safe transaction from running in a Titan block. It cannot stop Titan from
+including the attempt, and the executor pays gas for that revert. Titan includes reverting
+transactions routinely: 118 of 13,329 transactions in 57 Titan blocks (2026-11-11). The way to
+avoid that cost is to never let Titan see the transaction. Any wallet's default RPC sends to the
+public mempool, which Titan reads.
+
+**Routes that leave Titan out** (checked 2026-11-11 against each provider's docs):
+
+| Route | Endpoint | Use it as | Reaches |
+| --- | --- | --- | --- |
+| Flashbots Protect, default | `https://rpc.flashbots.net` | wallet RPC (reads and sends) | Flashbots builder only |
+| Flashbots Protect, chosen builders | `https://rpc.flashbots.net?builder=Quasar&builder=Bombora&builder=Eureka` | wallet RPC (reads and sends) | Flashbots builder plus each `builder=` named |
+| Quasar, direct | `https://rpc.quasar.win` | send only (`cast publish`); it answers no reads | Quasar only |
+
+- Flashbots Protect docs: by default "Transactions are only forwarded to the Flashbots block
+  builder", they are retried for 25 blocks and then dropped, and "Reverted transactions are not
+  included on chain."
+- The `builder=` names come from Flashbots' builder registry
+  ([builder-registrations.json](https://github.com/flashbots/dowg/blob/main/builder-registrations.json)).
+  Titan is listed there as `Titan`. Never add it.
+- Quasar docs: "All transactions sent to our builder are kept private." No API key needed.
+- Each builder you add gets your transaction privately. You trust it to keep it private.
+
+**Avoid:**
+
+- `https://rpc.flashbots.net/fast`: "Transactions are shared with all registered builders", Titan
+  included.
+- MEV Blocker: no way to choose or exclude builders.
+- bloXroute `blxr_private_tx` with `mev_builders` set to `all`. bloXroute can target named
+  builders (leave out `titan`), but it needs a paid key. It also falls back to the public mempool
+  after its `timeout` unless the timeout is 0.
+- Titan's own RPC, and any public RPC (Infura, Alchemy, a node's default `eth_sendRawTransaction`).
+
+**Speed.** In a 300-block sample (2026-11-11), Titan built 45% of blocks, Quasar 16%, BuilderNet
+(the Flashbots builder) 12%, Bombora 11% and Eureka 6%. Protect's default reaches about 12% of
+blocks, so a transaction can take a few minutes. It is dropped after 25 blocks if it hasn't landed.
+The chosen-builders URL above reaches about 45% of blocks, so a transaction usually lands within a
+few blocks.
+
+**Safe{Wallet}:** the owner who presses **Execute** sends the transaction from their own wallet.
+Add a custom network to that wallet (chain id 1) with one of the Protect URLs above as its RPC,
+switch to it, then execute.
+
+**Scripts:** sign the fully signed `execTransaction` call as a raw transaction, then publish it to
+one or more routes. Sending the same signed transaction to several routes is safe. The first
+inclusion uses the executor's nonce, and every other copy becomes invalid.
+
+```sh
+RAW=$(cast mktx $SAFE <execTransaction calldata> --ledger --rpc-url $ETH_RPC_URL)
+
+cast publish --rpc-url "https://rpc.flashbots.net?builder=Quasar&builder=Bombora&builder=Eureka" $RAW
+cast publish --rpc-url https://rpc.quasar.win $RAW
+```
+
+Providers change their sharing rules. Re-check these routes before relying on them. If a route
+starts reaching Titan, the guard still keeps the Safe action from running there.
 
 ## Change the lists
 
