@@ -128,6 +128,8 @@ about 18,500 gas per transaction with one watched registry.
 
 ## Installing (not done)
 
+Step-by-step commands, checks and the Safe{Wallet} flow: [README](../README.md#deploy).
+
 1. Deploy `BuilderVetoGuard(safe, [0x4838B106FCe9647Bdf1E7877BF73cE8B0BAD5f97], [0xbac71fe7a8c78f49eeb2d33b250988224796af70])`.
    One deployment per Safe.
 2. Safe transaction: `safe.setGuard(guard)`. On Safe 1.5.0 also `safe.setModuleGuard(guard)` to
