@@ -1,0 +1,74 @@
+{
+  "fork_block": 26389538,
+  "safe": "0x9e2b6378ee8ad2A4A95Fe481d63CAba8FB0EBBF9",
+  "titan": "0x4838B106FCe9647Bdf1E7877BF73cE8B0BAD5f97",
+  "registry": "0xbac71fe7a8c78f49eeb2d33b250988224796af70",
+  "marker_eoa": "0x0a03d5b6bab06f3dceac6b313e23117eadc1d17f",
+  "safe_version": "1.3.0",
+  "owners": 7,
+  "threshold": 3,
+  "gas": {
+    "exec_noop_unguarded": 59705,
+    "exec_noop_guarded": 78204,
+    "overhead": 18499
+  },
+  "install": {
+    "guard": "0xc4B5d65ee42CdcBfd8964b5a023e2c61865D9f18",
+    "ok": true,
+    "guard_slot": "0xc4B5d65ee42CdcBfd8964b5a023e2c61865D9f18",
+    "gas": 79016
+  },
+  "titan_block": {
+    "status": 0,
+    "coinbase": "0x4838b106fce9647bdf1e7877bf73ce8b0bad5f97",
+    "revert": "VetoedBuilder",
+    "nonce_unused": true
+  },
+  "simulation": {
+    "paid_eth_call": "VetoedBuilder",
+    "zero_price_eth_call_ok": true
+  },
+  "other_block": {
+    "status": 1,
+    "nonce": [
+      3235,
+      3236
+    ]
+  },
+  "marker_before": {
+    "marker_status": 1,
+    "safe_status": 0,
+    "revert": "VetoedCredibleBlock",
+    "lastCredibleBlock_is_block": true,
+    "nonce_unused": true
+  },
+  "marker_after": {
+    "safe_status": 1,
+    "marker_status": 1,
+    "nonce": [
+      3236,
+      3237
+    ]
+  },
+  "remove_marked": {
+    "marker_status": 1,
+    "safe_status": 1,
+    "guard_after": "0x0000000000000000000000000000000000000000"
+  },
+  "remove_titan": {
+    "status": 0,
+    "revert": "VetoedBuilder",
+    "guard_after": "0xc4B5d65ee42CdcBfd8964b5a023e2c61865D9f18"
+  },
+  "checks": {
+    "install": true,
+    "titan_block": true,
+    "simulation": true,
+    "other_block": true,
+    "marker_before": true,
+    "marker_after": true,
+    "remove_marked": true,
+    "remove_titan": true
+  },
+  "all_pass": true
+}
